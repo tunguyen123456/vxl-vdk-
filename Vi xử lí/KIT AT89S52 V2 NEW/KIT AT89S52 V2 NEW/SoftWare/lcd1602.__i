@@ -1,0 +1,1 @@
+"Device\Source\lcd1602.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\lcd1602.lst) TABS (2) OBJECT(lcd1602.obj)

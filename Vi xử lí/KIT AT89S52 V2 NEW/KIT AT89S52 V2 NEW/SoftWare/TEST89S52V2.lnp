@@ -1,0 +1,13 @@
+"STARTUP.obj",
+"main.obj",
+"ds18b20.obj",
+"key.obj",
+"mtp4x4.obj",
+"delay.obj",
+"glcd.obj",
+"lcd1602.obj",
+"led7.obj",
+"uart.obj",
+"Control.obj" 
+TO "TEST89S52V2" 
+RAMSIZE(256) 

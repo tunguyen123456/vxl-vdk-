@@ -1,0 +1,187 @@
+C51 COMPILER V9.01   LCD                                                                   05/16/2015 08:59:27 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE lcd.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          
+   3          sbit CS0  = P2^3;               //片选
+   4          sbit RST  = P2^4;               //复位
+   5          sbit RS   = P2^7;               //数据命令选择端
+   6          sbit SCL  = P2^6;               //SPI时钟端
+   7          sbit SDA  = P2^5;               //SPI数据端
+   8          
+   9          void Delay10ms(unsigned int c)   //误差 0us
+  10          {
+  11   1          unsigned char a,b;
+  12   1          for(;c>0;c--)
+  13   1              for(b=38;b>0;b--)
+  14   1                  for(a=130;a>0;a--);
+  15   1      }
+  16          
+  17          
+  18          void  SendDataSPI(unsigned char dat)
+  19          {  
+  20   1         unsigned char i;
+  21   1         
+  22   1         for(i=0; i<8; i++)                   
+  23   1         {  
+  24   2            if( (dat&0x80)!=0 ) SDA = 1;
+  25   2              else SDA = 0;
+  26   2      
+  27   2            dat <<= 1;
+  28   2      
+  29   2                SCL = 0;
+  30   2            SCL = 1;                  
+  31   2         }
+  32   1      }
+  33          
+  34          void WriteComm(unsigned int i)
+  35          {
+  36   1      
+  37   1          CS0 = 0;
+  38   1              RS  = 0;
+  39   1      
+  40   1              SendDataSPI(i);
+  41   1      
+  42   1              CS0 = 1;
+  43   1      
+  44   1      }
+  45          void WriteData(unsigned int i)
+  46          {
+  47   1          CS0 = 0;
+  48   1              RS  = 1;
+  49   1      
+  50   1              SendDataSPI(i);
+  51   1      
+  52   1              CS0 = 1;
+  53   1      }
+  54          
+  55          void LCD_Init(void)
+C51 COMPILER V9.01   LCD                                                                   05/16/2015 08:59:27 PAGE 2   
+
+  56          {
+  57   1              unsigned int i;
+  58   1              RST=1;  
+  59   1              for(i = 0; i < 1000; i++);
+  60   1              
+  61   1              RST=0;
+  62   1              for(i = 0; i < 1000; i++);
+  63   1      
+  64   1              RST=1;
+  65   1              for(i = 0; i < 1000; i++);
+  66   1      
+  67   1          WriteComm(0xe2);              //软件复位
+  68   1              WriteComm(0xc8);                  //0xA0段方向选择正常方向（0xA1为反方向
+  69   1              WriteComm(0xa0);                  //0xC8普通方向选择选择反向，0xC0为正常方向
+  70   1              WriteComm(0x2f);
+  71   1              WriteComm(0x26);
+  72   1              WriteComm(0x81);                  //背景光对比度
+  73   1              WriteComm(0x10);                  //0x10设置列高地址 
+  74   1              WriteComm(0xaf);                  //开启显示
+  75   1              //WriteComm(0xa4);
+  76   1      
+  77   1      
+  78   1      
+  79   1      
+  80   1      }
+  81          
+  82          void Clear()
+  83          {
+  84   1              unsigned char i,j;
+  85   1              
+  86   1              for(i=0; i < 6; i++)
+  87   1              {
+  88   2                      WriteComm(0x40);
+  89   2                      WriteComm(0xb0+i);
+  90   2                      WriteComm(0x10);
+  91   2                      WriteComm(0x00);
+  92   2                      
+  93   2                      for(j = 0; j < 96; j++)
+  94   2                      {
+  95   3                              WriteData(0x00);        
+  96   3                      }       
+  97   2              }               
+  98   1      }
+  99          
+ 100          void Displine(void)                       //行扫屏
+ 101            {
+ 102   1         unsigned int i,k;
+ 103   1      
+ 104   1              for(i = 0 ; i <6; i++)
+ 105   1              {
+ 106   2              WriteComm(0x40);  //set scroll line     设置滚动一行
+ 107   2              WriteComm(0xb0+i);//set page address            设置页地址
+ 108   2              WriteComm(0x10); //column  msb          列最高位
+ 109   2              WriteComm(0x00); //column  lsb          列最低位
+ 110   2              for(k=0;k<96;k++)
+ 111   2              {
+ 112   3                          WriteData(0XF0);
+ 113   3                               Delay10ms(1);
+ 114   3               }
+ 115   2          }
+ 116   1              Clear();
+ 117   1      }
+C51 COMPILER V9.01   LCD                                                                   05/16/2015 08:59:27 PAGE 3   
+
+ 118          
+ 119          void Clear_Lcd()
+ 120          {
+ 121   1              unsigned char i,j;
+ 122   1      
+ 123   1              for(i = 0; i < 6; i++)
+ 124   1              {
+ 125   2                      WriteComm(0x40);
+ 126   2                      WriteComm(0XB0+i);
+ 127   2                      WriteComm(0x10);
+ 128   2                      WriteComm(0x00);
+ 129   2                      for(j = 0; j < 96; j++)
+ 130   2                      {
+ 131   3                              WriteData(0xff);
+ 132   3                              Delay10ms(1);                                                           
+ 133   3                      }       
+ 134   2              }
+ 135   1      
+ 136   1              for(i = 0; i < 7; i++)
+ 137   1              {
+ 138   2                      WriteComm(0XB0+i);
+ 139   2                      WriteComm(0x10);
+ 140   2                      WriteComm(0x00);
+ 141   2                      for(j = 0; j < 96; j++)
+ 142   2                      {
+ 143   3                              WriteData(0x00);
+ 144   3                              Delay10ms(1);                                                           
+ 145   3                      }       
+ 146   2              }
+ 147   1      
+ 148   1      }
+ 149          
+ 150          
+ 151          void main()
+ 152          {
+ 153   1              LCD_Init();
+ 154   1              Clear();
+ 155   1              while(1)
+ 156   1              {
+ 157   2                      //Displine();
+ 158   2                      Clear_Lcd();
+ 159   2              }       
+ 160   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    343    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

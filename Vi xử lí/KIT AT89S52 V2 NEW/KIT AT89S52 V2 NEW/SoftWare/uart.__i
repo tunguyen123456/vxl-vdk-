@@ -1,0 +1,1 @@
+"Device\Source\uart.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\uart.lst) TABS (2) OBJECT(uart.obj)

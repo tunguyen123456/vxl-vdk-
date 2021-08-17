@@ -1,0 +1,10 @@
+".\HEX\STARTUP.obj",
+".\HEX\main.obj",
+".\HEX\delay.obj",
+".\HEX\lcd1602.obj",
+".\HEX\uart.obj",
+".\HEX\ds18b20.obj",
+".\HEX\timer.obj",
+".\HEX\Control.obj" 
+TO ".\HEX\TEST89S52V2" 
+PRINT(".\TEST89S52V2.m51") RAMSIZE(256) 

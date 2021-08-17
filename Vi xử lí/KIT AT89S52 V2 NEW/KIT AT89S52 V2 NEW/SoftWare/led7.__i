@@ -1,0 +1,1 @@
+"Device\Source\led7.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\led7.lst) TABS (2) OBJECT(led7.obj)

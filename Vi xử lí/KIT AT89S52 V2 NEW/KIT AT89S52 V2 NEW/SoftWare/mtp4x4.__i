@@ -1,0 +1,1 @@
+"Device\Source\mtp4x4.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\mtp4x4.lst) TABS (2) OBJECT(mtp4x4.obj)

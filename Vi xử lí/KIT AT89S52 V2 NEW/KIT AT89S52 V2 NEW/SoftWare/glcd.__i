@@ -1,0 +1,1 @@
+"Device\Source\glcd.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\glcd.lst) TABS (2) OBJECT(glcd.obj)

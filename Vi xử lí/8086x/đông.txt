@@ -1,0 +1,422 @@
+X0 EQU 30H
+X1 EQU 31H
+X2 EQU 32H
+X3 EQU 33H
+X4 EQU 34H
+OP0 EQU 35H
+OP1 EQU 36H
+OP2 EQU 37H
+OP3 EQU 38H
+RESULT EQU 39H
+SIGN EQU 40H
+TEMP EQU 41H
+DF BIT 0AH
+OF BIT 0BH
+AF BIT 0CH
+;-------------------------------
+
+
+
+
+
+
+
+;-------------------------------------
+ORG 0H
+JMP MAIN
+
+MAIN:
+CALL CLEAR
+CALL INPUT
+CALL CAL_5SO_1	 ; nhanchia
+CALL CAL_5SO_2 ; cong tru
+CALL OUTPUT
+JMP MAIN
+;------------------------------
+;------------------------------
+CLEAR:										
+CLR		A										
+MOV		X0,A						
+MOV		X1,A		
+MOV		X2,A	
+MOV		X3,A		
+MOV		X4,A							
+MOV		OP0,A		
+MOV		OP1,A
+MOV		OP2,A
+MOV		OP3,A									
+MOV		RESULT,A						
+MOV		SIGN,A				
+MOV		TEMP,A					
+CLR		C						
+MOV		DF,C				
+MOV		OF,C					
+MOV		AF,C					
+RET	
+;--------------------------------
+CAL:									
+		CJNE 	R7,#"+",N1				
+		ADD		A,B						
+		MOV		RESULT,A				
+		MOV		SIGN,#"+"				
+		RET									
+N1:		CJNE	R7,#"-",N2				
+		SUBB	A,B							
+		JC		NIGATIV						
+		MOV		RESULT,A					
+		MOV		SIGN,#"+"				
+		RET										
+NIGATIV: CPL		A							
+		INC 	        A							       
+		MOV		RESULT,A			
+		MOV		SIGN,#"-"					
+		RET									
+N2:		CJNE	R7,#"*",N3				
+		MUL		AB							
+		MOV		RESULT,A						
+		MOV		SIGN,#"+"			
+		RET								
+N3:		CJNE	R7,#"/",N4				
+		MOV		TEMP,B					
+		DIV		AB							
+		MOV		RESULT,A						
+		MOV		A,#0AH				
+		MUL		AB						
+		MOV		B,TEMP				
+		DIV		AB								
+		MOV		TEMP,A					
+		MOV		SIGN,#"+"				
+N4:		RET	
+;------------------------------------
+CAL_5SO_1:
+MOV R7, OP0
+CJNE R7, #"/",CAL1
+CAL3:
+MOV A,X0
+MOV B,X1
+CALL CAL
+MOV X0, RESULT
+MOV OP0,OP1
+MOV X1,X2
+MOV OP1,OP2
+MOV X2,X3
+MOV OP2,OP3
+MOV X3,X4
+CLR A
+MOV X4,A
+MOV OP3,A
+JMP CAL_5SO_1
+CAL1:
+CJNE R7,#"*",CAL2
+JMP CAL3
+CAL2:
+MOV R7,OP1
+CJNE R7,#"/",CAL4
+CAL5:
+MOV A,X1
+MOV B,X2
+CALL CAL
+MOV X1,RESULT
+MOV OP1,OP2
+MOV X2,X3
+MOV OP2,OP3
+MOV X3,X4
+CLR A
+MOV X4,A
+MOV OP3,A
+JMP CAL2
+CAL4:
+CJNE R7,#"*",CAL6
+JMP CAL5
+CAL6:
+MOV R7,OP2
+CJNE R7,#"/",CAL7
+CAL9:
+MOV A,X2
+MOV B,X3
+CALL CAL
+MOV X2,RESULT
+MOV OP2,OP3
+MOV X3,X4
+CLR A
+MOV X4,A
+MOV OP3,A
+JMP CAL6
+CAL7:
+CJNE R7,#"*",CAL8
+JMP CAL9
+CAL8:
+MOV R7,OP3
+CJNE R7,#"/",CAL10
+CAL12:
+MOV A,X3
+MOV B,X4
+CALL CAL
+CLR A
+MOV X4,A
+MOV OP3,A
+RET
+CAL10:
+CJNE R7,#"*",CAL11
+JMP CAL12
+CAL11:
+RET
+;---------------------------------
+CAL_5SO_2:
+MOV R7,OP0
+CJNE R7,#0,CAL15
+RET
+CAL15:
+MOV A,X0
+MOV B,X1
+CALL CAL
+MOV X0,RESULT
+MOV OP0,OP1
+MOV X1,X2
+MOV OP1,OP2
+MOV X2,X3
+MOV OP2,OP3
+MOV X3,X4
+CLR A
+MOV X4,A
+MOV OP3,A
+JMP CAL_5SO_2
+;---------------------------------
+INPUT:
+CALL SAVE_NUMBER
+MOV X0,A
+CALL SAVE_OPER
+MOV OP0,A
+CALL SAVE_NUMBER
+MOV X1,A
+CALL SAVE_OPER
+JB AF,NOERR
+MOV OP1,A
+CALL SAVE_NUMBER
+MOV X2,A
+CALL SAVE_OPER
+JB AF,NOERR
+MOV OP2,A
+CALL SAVE_NUMBER
+MOV X3,A
+CALL SAVE_OPER
+JB AF,NOERR
+MOV OP3,A
+CALL SAVE_NUMBER
+MOV X4,A
+CALL SAVE_OPER
+JMP NOERR
+ERR:
+CALL ERR_MESS
+LJMP MAIN
+NOERR:
+RET
+;-------------------------------
+SAVE_NUMBER:
+CALL SCAN_KEYPAD
+CALL OPERATOR
+JB OF,ERR
+JB AF,ERR
+CALL UART_
+ANL A,#0FH
+RET
+;----------------------------
+SAVE_OPER:
+CALL SCAN_KEYPAD
+CALL OPERATOR
+JB DF,ERR
+CALL UART_
+RET
+;-----------------------------								
+;-----------------------------
+OUTPUT:
+MOV		R7,TEMP		
+MOV		R6,SIGN
+CJNE	R7,#0,POINTED										
+RETURN:	
+MOV		A,RESULT
+MOV		B,#100D							
+DIV		AB				
+JZ		LESSTEN		
+ORL		A,#30H		
+CALL	UART_				
+MOV		A,B		
+MOV B,#0AH		
+DIV AB
+ORL A,#30H
+CALL UART_
+MOV A,B
+ORL A,#30H
+CALL	UART_				
+JMP	DONE					
+LESSTEN:
+CJNE R6,#"-",DAU
+MOV A,#"-"
+CALL UART_
+DAU:
+MOV	A,B
+MOV B,#0AH
+DIV AB
+JZ LESSTEN1
+ORL		A,#30H						
+CALL	UART_
+LESSTEN1:
+MOV A,B
+ORL A,#30H
+CALL UART_
+CJNE	R7,#0,EXIT_OUT
+JMP	DONE
+EXIT_OUT:
+RET			
+POINTED:
+CALL RETURN		
+MOV		A,#"."					
+ACALL	UART_		
+MOV		A,TEMP	
+ORL		A,#30H		
+CALL	UART_			
+AJMP	DONE				
+SIGNED:
+MOV		A,#"-"		
+CALL	UART_		
+JMP	RETURN			
+DONE:							
+RET								
+;--------------------------------
+OPERATOR:
+	CJNE	A,#"+", SUB				
+	AJMP	FOUND_EXIT							
+SUB:
+	 CJNE	A,#"-", MULTI						
+	AJMP	FOUND_EXIT							
+MULTI:
+	CJNE	A,#"*", DIVI						
+	AJMP	FOUND_EXIT							
+DIVI:
+	CJNE 	A,#"/", EQUAL						
+	AJMP	FOUND_EXIT							
+EQUAL:
+	CJNE	A,#"=", EXIT					
+	CLR		DF							
+	CLR		OF							 
+	SETB	AF								
+	RET									
+EXIT:
+	SETB	DF								
+	CLR		OF								
+	CLR		AF								
+	RET										
+ FOUND_EXIT:
+	CLR		DF							
+	SETB	OF								
+	CLR		AF							
+	RET	
+;-----------------------------------
+SCAN_KEYPAD:
+	MOV P1,#11111111B
+S1:	MOV P2,#0
+	MOV A,P1
+	ANL A,#00001111B
+	CJNE A,#00001111B,S1
+S2:	CALL DELAY_20MS
+	MOV A,P1
+	ANL A,#00001111B
+	CJNE A,#00001111B,OUT
+	SJMP S2
+OUT:CALL DELAY_20MS
+	MOV A,P1
+	ANL A,#00001111B
+	CJNE A,#00001111B,OUT1
+OUT1:MOV P2,#11111110B
+	 MOV A,P1
+	 ANL A,#00001111B
+	 CJNE A,#00001111B,ROW_0
+	 MOV P2,#11111101B
+	 MOV A,P1
+	 ANL A,#00001111B
+	 CJNE A,#00001111B,ROW_1
+	 MOV P2,#11111011B
+	 MOV A,P1
+	 ANL A,#00001111B
+	 CJNE A,#00001111B,ROW_2
+	 MOV P2,#11110111B
+	 MOV A,P1
+	 ANL A,#00001111B
+	 CJNE A,#00001111B,ROW_3
+	 LJMP S2
+ROW_0:
+	 MOV DPTR,#ROW0
+	 JMP CHECK
+ROW_1:
+	 MOV DPTR,#ROW1
+	JMP CHECK 
+ROW_2:
+	 MOV DPTR,#ROW2
+	 JMP CHECK
+ROW_3:
+	 MOV DPTR,#ROW3
+	 JMP CHECK
+CHECK:
+	 RRC A
+	 JNC FOUND
+	 INC DPTR
+	 JMP CHECK
+FOUND:
+	 CLR A
+	 MOVC A,@A+DPTR
+	 CJNE A,#"X",F1
+	 CALL CLEAR_CMD
+	 F1:
+	 RET
+;-----------------------------------
+ERR_MESS:
+MOV DPTR,#ERROR
+E1:
+CLR A
+MOVC A,@A+DPTR
+CALL UART_
+CALL DELAY_20MS
+INC DPTR
+JZ E2
+SJMP E1
+E2:
+CALL DELAY_20MS
+CALL CLEAR_CMD
+RET
+;-------------------------------------
+CLEAR_CMD:
+MOV A,#254D
+CALL UART_
+MOV A,#1D
+CALL UART_
+LJMP MAIN
+RET
+;-------------------------------------	 
+DELAY_20MS:
+	 MOV R0,#50
+D1:	 MOV R1,#255
+D2:	 DJNZ R1,D2
+	 DJNZ R0,D1
+	 RET
+;--------------------------------------
+UART_:
+MOV TMOD,#20H
+MOV TH1,#0FDH
+MOV SCON,#50H
+SETB TR1
+MOV SBUF,A
+HERE:
+JNB TI,HERE
+CLR TI
+RET
+;----------------------------------
+ORG 300H
+ERROR: DB "ERROR",0
+CLEAR_LCD: DB 254D,01D
+ROW0: DB   "7","8","9","/"
+ROW1: DB   "4","5","6","*"
+ROW2: DB   "1","2","3","-"
+ROW3: DB   "X","0","=","+"
+
+END
+;;---------------------------

@@ -1,0 +1,1 @@
+"ProjectLib\Source\Control.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\Control.lst) TABS (2) OBJECT(Control.obj)

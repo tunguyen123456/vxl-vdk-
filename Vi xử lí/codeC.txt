@@ -1,0 +1,76 @@
+#include <REGX52.H>
+//Khai bao ket noi IC 74595
+sbit IE74595_SHCP=P2^0;	  //xung clock
+sbit IE74595_DS=P2^1;	  // chan data
+sbit IE74595_STCP=P2^2;	// chan chot du lieu 
+
+unsigned char ma[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+unsigned char temp=0x00;
+void delay(int n)
+{
+	  while(n--){};
+
+}
+
+void IE74595_Out_Byte(unsigned char b)
+{
+ unsigned char i;
+ for(i=0;i<8;i++)
+ {
+ 	IE74595_DS=b & (0x80>>i);//lay bit co trong so cao nhat 
+	IE74595_SHCP=0;
+	IE74595_SHCP=1;
+}
+
+IE74595_STCP=0;
+IE74595_STCP=1;
+}
+//ham in ra 1 led 
+void IE74595_OUT_1Led(int n )
+{ temp=ma[n];
+  IE74595_Out_Byte(ma[n]);
+}
+//in ra nhieu led 
+void IE74595_OUT_N_LED(int n)
+{	  //clear
+  if (n==0)
+  {
+	  IE74595_Out_Byte(0x00);
+  }
+  else
+ 	{  if ( temp==0x00)
+	  {
+	  	 IE74595_OUT_1Led(n-1);
+	  } 
+	  else
+	  {
+	  
+	  	   temp=temp|ma[n-1];
+		   IE74595_Out_Byte(temp);
+	  
+	  
+	  }
+
+	  }
+
+}
+
+void main()
+{
+ //IE74595_Out_Byte(0x56);
+ //doc_ma(4);
+ 
+
+ 
+  	IE74595_OUT_N_LED(6);
+    IE74595_OUT_N_LED(7);
+    IE74595_OUT_N_LED(1); 
+	IE74595_OUT_N_LED(5);
+ while(1)
+ {
+ 	 
+	 
+ }
+
+
+}

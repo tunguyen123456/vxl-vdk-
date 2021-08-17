@@ -1,0 +1,101 @@
+C51 COMPILER V8.05a   INFR                                                                 10/15/2015 12:20:43 PAGE 1   
+
+
+C51 COMPILER V8.05a, COMPILATION OF MODULE INFR
+OBJECT MODULE PLACED IN .\HEX\infr.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Device\Source\infr.c BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Mai
+                    -n\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\infr.lst) TABS(2) OBJECT(.\HEX\infr.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * Ten Tep          :   infr.c
+   4            * Tac Gia          :   LE ANH QUANG
+   5            * Cong Ty          :   MinhHaGroup
+   6            * Website          :   MinhHaGroup.com
+   7            * Phien Ban        :   V1.0.0
+   8            * Tom Tat          :   File dinh nghia cac ham xu ly hong ngoai 
+   9            *           
+  10            *
+  11            ******************************************************************************
+  12            * Chu Y: Trong Project nay su dung remote 3 kenh (co ma cac kenh duoc xac dinh bang OSCILLOSCOPE)
+  13                    Cac ban co the su dung thuat toan trong Project de giai ma cac remote cua SONY, LG
+  14                    (co ma cac kenh co dinh cua nha san xuat)
+  15            *                                    
+  16            ******************************************************************************
+  17            */  
+  18          
+  19          #include <main.h>
+  20          
+  21          // ===============================================================
+  22          // Ham check xung START 
+  23          /* Xung START là xung co:
+  24          - tin hieu o muc thap (0) có do dai 9ms
+  25          - tin hieu o muc cao (1) có do dai 4ms 
+  26          */
+  27          unsigned char check_start()
+  28          {
+  29   1           unsigned char i;
+  30   1           if(DATA_INFR==0)              // Neu co canh xuong cua tin hieu
+  31   1           {
+  32   2                delay_us(500);           // Delay de chong nhieu
+  33   2                if(DATA_INFR==0)         // Neu dung la co canh xuong cua tin hieu
+  34   2                {       
+  35   3                     for(i=0;i<40;i++)   // Chia nho xung START thanh 40 doan, moi doan dai 200us
+  36   3                     {
+  37   4                          delay_us(200);
+  38   4                          if(DATA_INFR==1) return 0;    // Neu tin hieu len muc cao (1) --> khong phai xung STAR
+             -T
+  39   4                     } 
+  40   3                     while(DATA_INFR==1);               
+  41   3                     return 1;           // Dung la xung start
+  42   3                }
+  43   2                
+  44   2           }
+  45   1      }  
+  46          
+  47          // ===============================================================  
+  48          //  Ham doc ma cua cac kenh
+  49          unsigned long int infr_sensor()
+  50          {
+  51   1           unsigned char i;
+  52   1           unsigned int Data_Infr;
+  53   1           Data_Infr=0;
+C51 COMPILER V8.05a   INFR                                                                 10/15/2015 12:20:43 PAGE 2   
+
+  54   1           if(check_start())                  // Neu dung xung START
+  55   1           {
+  56   2                while(DATA_INFR==1);          // Cho het bit 1 tiep theo
+  57   2                while(DATA_INFR==0);          // Cho het bit 0 tiep theo
+  58   2                for(i=0;i<24;i++)             // Lay 24 bit du lieu (bao gom 8 bit 0 va 8 bit 1 dau tien sau xun
+             -g start)
+  59   2                {    
+  60   3                     //while(DATA_INFR==0);
+  61   3                     delay_us(750);           // Delay 750us de kiem tra bit
+  62   3                     if(DATA_INFR==0) Data_Infr=Data_Infr*2 + 1;
+  63   3                     if(DATA_INFR==1) Data_Infr=Data_Infr*2;
+  64   3                     while(DATA_INFR==1);     // cho canh len
+  65   3                     while(DATA_INFR==0);     // cho canh len
+  66   3                }
+  67   2                delay_ms(600);                // Cho het tin hieu (chong nhieu) 
+  68   2           }
+  69   1           return Data_Infr;                  // Gia tri ma kenh tra ve
+  70   1      }
+  71          
+  72          //---------------END OF FILE-----------------/
+  73          //--------------------------------------------/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    136    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,94 @@
+GIAY      EQU    R2
+PHUT      EQU    R3
+GIO       EQU    R4
+BIEN_GIAY EQU    R5
+    ORG    000H
+    JMP    MAIN
+    ORG    00BH  
+    JMP    NGAT_T0
+MAIN:  
+    MOV    TMOD,#01H
+    MOV    TH0,#HIGH(-50000)
+    MOV    TL0,#LOW(-50000)
+    CLR    TF0
+    SETB    TR0
+    MOV    IE,#82H ;ngat ngoai timer 0
+LOOP:
+       MOV    GIO,#0
+X4:    MOV    PHUT,#0
+X3:    MOV    GIAY,#0
+X2:    MOV    BIEN_GIAY,#0
+    CALL    HEX_BCD
+    CALL    BCD_7DOAN
+X1:    CALL    HIENTHI
+    CJNE    BIEN_GIAY,#20,X1
+    INC    GIAY
+    CJNE    GIAY,#60,X2
+    INC    PHUT
+    CJNE    PHUT,#60,X3
+    INC    GIO
+    CJNE    GIO,#24,X4
+    JMP    LOOP
+;*********************************************
+NGAT_T0:
+    MOV    TL0,#LOW(-50000)
+    MOV    TH0,#HIGH(-50000)
+    INC    BIEN_GIAY
+RETI
+;*********************************************
+HEX_BCD:
+    MOV     A,GIAY
+    MOV     B,#10
+    DIV       AB
+    MOV    10H,B            ;LUU SO HANG DV GIAY
+    MOV    11H,A              ;LUU SO HANG CHUC GIAY
+  
+    MOV    A,PHUT
+    MOV    B,#10
+    DIV       AB
+    MOV    12H,B            ;LUU SO HANG DV PHUT
+    MOV    13H,A            ;LUU SO HANG CHUC PHUT
+
+    MOV    A,GIO
+    MOV    B,#10
+    DIV       AB
+    MOV    14H,B        ;LUU SO HANG DV GIO
+    MOV    15H,A        ;LUU SO HANG CHUC GIO
+RET
+;*********************************************
+BCD_7DOAN:
+    MOV    DPTR,#MA7DOAN // gan dia chi cua mang 
+    MOV    R0,#10H //  16 -> 0001_0000    
+    MOV    R1,#20H // 32 -> 0011_0010
+GM1: MOV    R6,#2 
+GM2: MOV    A,@R0 // A=16
+    MOVC  A,@A+DPTR // 16 +dia chi cua mang -> gia tri cua phan tu cua mang 
+    MOV    @R1,A //
+    INC      R0
+    INC      R1
+    DJNZ    R6,GM2
+    MOV    @R1,#0BFH //1011_1111
+    INC       R1
+    CJNE    R0,#16H,GM1 22 ->0001_0110
+RET
+;*********************************************
+HIENTHI:
+    MOV     R0,#20H // 32decimal
+    MOV     A,#80H //128 1000_0000
+HT: MOV   P0,@R0
+    MOV     P2,A
+    CALL    DELAY
+    MOV     P2,#00H        ;CHONG LEM
+    INC       R0
+    RR        A
+    CJNE    A,#80H,HT
+RET
+;*********************************************
+DELAY:
+    MOV    R7,#0FFH
+    DJNZ    R7,$
+RET
+;*********************************************
+MA7DOAN:
+DB 0C0H,0F9H,0A4H,0B0H,99H,92H,82H,0F8H,80H,90H
+END

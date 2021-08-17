@@ -1,0 +1,284 @@
+ORG 0000H
+LJMP MAIN
+ORG 23H
+LJMP SERIAL // NGAT TRUYEN THONG NOI TIEP
+//IC595_0
+IDX0_IC595_SHCP EQU P0.0 //XUNG
+IDX0_IC595_SHDS EQU P0.1 //DATA
+IDX0_IC595_STCP EQU P0.2 //CHOT
+
+//IC595_1
+IDX1_IC595_SHCP EQU P0.3 //XUNG
+IDX1_IC595_SHDS EQU P0.4 //DATA
+IDX1_IC595_STCP EQU P0.5 //CHOT
+
+//IC595_2
+IDX2_IC595_SHCP EQU P1.0 //XUNG
+IDX2_IC595_SHDS EQU P1.1 //DATA
+IDX2_IC595_STCP EQU P1.2 //CHOT
+
+
+//IC595_3
+IDX0_IC595_SHCP EQU P2.0 //XUNG
+IDX0_IC595_SHDS EQU P2.1 //DATA
+IDX0_IC595_STCP EQU P2.2 //CHOT
+
+/////
+ledStart EQU P3.4
+ledUart  EQU P3.5
+button   EQU P3.6
+led1     EQU P3.7
+
+//change from bank0 to bank1
+// dia chi bank1
+STATE_595_0 EQU 08h
+STATE_595_1 EQU 09h
+STATE_595_2 EQU 0Ah
+STATE_595_3	EQU 0Bh
+
+
+r_data EQU 31H
+START_BYTE EQU 32H
+MODE EQU 33H
+Count EQU 34h
+LAP EQU 35H
+INDEX EQU 36H
+value EQU 37H
+DATA EQU 38H
+
+/////////////////////////////////////
+MA_HOA : DB 01H,02h,04h,08h,10h,20h,40h,80h 
+
+//////////////////////////////////
+MAIN:
+MOV DPTR,#MA_HOA
+CALL UART_Init 
+loopn:
+jmm loopn
+
+
+/////////////////////////////////
+OUT_BYTE_LED:
+MOV A,INDEX
+CJNE A,#0,N1
+MOV STATE_595_0,value
+/////////
+XUATBYTE0:
+LOOP0:
+MOV  LAP,#8 
+OUT_BYTE0:
+SETB C 
+MOV A,value 
+RL A 
+MOV value,A 
+ANL A,#01H
+MOV P2,A
+ANL C,P2.0 
+MOV IDX0_IC595_DS,C 
+SETB IDX0_IC595_SHCP
+CLR  IDX0_IC595_SHCP
+DJNZ LAP,OUT_BYTE0
+SETB IDX0_IC595_STCP
+CLR  IDX0_IC595_STCP
+RET
+/////////////
+N1:
+CJNE A,#1,N2
+MOV STATE_595_1,value
+/////////
+XUATBYTE1:
+LOOP1:
+MOV  LAP,#8 
+OUT_BYTE1:
+SETB C 
+MOV A,value 
+RL A 
+MOV value,A 
+ANL A,#01H
+MOV P2,A
+ANL C,P2.0 
+MOV IDX1_IC595_DS,C 
+SETB IDX1_IC595_SHCP
+CLR  ID1_IC595_SHCP
+DJNZ LAP,OUT_BYTE1
+SETB IDX1_IC595_STCP
+CLR  IDX1_IC595_STCP
+RET
+//////////////////////
+N2:
+CJNE A,#2,N3
+MOV STATE_595_2,value
+/////////
+XUATBYTE2:
+LOOP2:
+MOV  LAP,#8 
+OUT_BYTE2:
+SETB C 
+MOV A,value 
+RL A 
+MOV value,A 
+ANL A,#01H
+MOV P2,A
+ANL C,P2.0 
+MOV IDX2_IC595_DS,C 
+SETB IDX2_IC595_SHCP
+CLR  IDX2_IC595_SHCP
+DJNZ LAP,OUT_BYTE2
+SETB IDX2_IC595_STCP
+CLR  IDX2_IC595_STCP
+RET
+//////////////
+N3:
+MOV STATE_595_3,value
+/////////
+XUATBYTE3:
+LOOP3:
+MOV  LAP,#8 
+OUT_BYTE3:
+SETB C 
+MOV A,value 
+RL A 
+MOV value,A 
+ANL A,#01H
+MOV P2,A
+ANL C,P2.0 
+MOV IDX3_IC595_DS,C 
+SETB IDX3_IC595_SHCP
+CLR  IDX3_IC595_SHCP
+DJNZ LAP,OUT_BYTE3
+SETB IDX3_IC595_STCP
+CLR  IDX3_IC595_STCP
+RET
+
+
+/////////////////////////////////////
+OUT_BIT_LED:
+CJNE INDEX,#0,L1
+MOV A,value
+MOVC A,@A +DPTR 
+MOV value,A 
+MOV STATE_595_0,A
+CALL OUT_BYTE_LED
+RET
+L1:CJNE INDEX,#1,L2
+MOV A,value
+MOVC A,@A +DPTR 
+MOV value,A 
+MOV STATE_595_1,A
+CALL OUT_BYTE_LED
+RET
+L2:CJNE INDEX,#2,L3
+MOV A,value
+MOVC A,@A +DPTR 
+MOV value,A 
+MOV STATE_595_2,A
+CALL OUT_BYTE_LED
+RET
+L3:
+MOV A,value
+MOVC A,@A +DPTR 
+MOV value,A 
+MOV STATE_595_3,A
+CALL OUT_BYTE_LED
+RET
+
+///////////////////////////////////
+UART_Init:
+ MOV TMOD,#20H;		Timer 1, 8-bit auto reload mode 
+ MOV TH1,#FDH;		Load value for 9600 baud rate 
+ MOV SCON,#50H ;	Mode 1, reception enable 
+ MOV TR1,#1;
+ MOV IE,#90H;		 Start timer 1 
+ ret
+
+ ////////////////////////////////////
+ORG 100H
+JB,TRANS
+CJNE RI,#1,EXIT
+MOV DATA,SBUF
+CALL Receive_Handler
+CLR RI
+RETI
+TRANS: CLR TI
+RETI 
+END 
+
+//////////////////////////////////
+Mode1_Handler:
+MOV R7,DATA
+CJNE R7,#0,so_sanh_C
+so_sanh_C:
+jb C,LED_ON
+CJNE R7,#255,so_sanh_C1
+so_sanh_C1:
+jnb C,LED_ON
+CALL OUT_BYTE_LED
+INC Count
+CJNE Count,#4,Exit
+MOV Count,#0
+mov Start_byte,#0
+mov MODE,#0
+RET
+LED_ON:
+RET
+//////////////////////////////////
+Receive_Handler:
+MOV RI,#0
+MOV A,DATA
+ADD A,#-30
+MOV DATA,A
+CJNE START_BYTE,#0,M1  ; th chua co du lieu va nhan dc start_byte
+CJNE DATA,#0,M1
+mov ledStart,#0
+mov START_BYTE,#1
+RET
+
+M1:	//// neu da start va mode chua co, thi check xem mode byte co dung
+CJNE START_BYTE,#1,M2  //START_BYTE == 1 && MODE == 0 && (Data > 0 && Data < 4
+CJNE MODE,#0,M2
+CJNE DATA,#0,M11
+M11: JNB C,M12
+M12: CJNE DATA,#4,M13
+M13:JNB C,2
+MOV MODE,DATA  // MODE = Data;
+RET
+M2:	//START_BYTE !=0 && MODE != 0
+CJNE START_BYTE,#0,M12
+RET
+M12: CJNE MODE,#0,M22
+MOV START_BYTE,#0 ;	 //START_BYTE !=0 && MODE == 0
+MOV MODE,#0 ;		 //START_BYTE = 0 ;	MODE = 0 ;
+RET
+M22:
+CJNE MODE,#1,M23	   //chon mode de hien thi dau tien 
+CALL Mode1_Handler
+RET
+M23:CJNE MODE,#2,M24
+CALL Mode1_Handler
+RET
+M24:CJNE MODE,#3,M25
+CALL Mode1_Handler
+RET
+
+
+Exit:
+Ret
+
+
+;Ham delay 1s
+DELAY:
+MOV R5,#200
+DELAY1:
+MOV TMOD,#01H
+MOV TH0,#HIGH(-5000)
+MOV TL0,#LOW(-5000)
+SETB TR0
+HERE:
+JNB TF0,$
+CLR TF0
+CLR TR0
+DJNZ R5,DELAY1
+RET
+;ham exit
+
+end

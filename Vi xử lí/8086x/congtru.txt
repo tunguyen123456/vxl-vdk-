@@ -1,0 +1,40 @@
+.model small
+.stack 100h
+.data
+.code
+
+main proc
+    ;code in here
+    ;ham cong 
+    mov al,5
+    mov bl,9
+    sub al,bl 
+    
+    ; ham mul là ham nhan 
+    ; mov 1 so hang vao al
+    ;sau do mov 1 so hang vao bl 
+    ;ket qua nhan dc tu dong ghi vao thi ghi al
+    mov ax,20
+    mov bx,6
+    mul bl 
+    
+    ;doi voi phep chia div
+    ;chia 8 bit thi phan nguyen luu trong AL, phan du luu trong AH
+    ; chia voi 16 bit thi phan nguyen luu trong AX, phan du luu trong DX
+    mov ax,20
+    mov bx,6
+    mul bl
+    
+    
+    
+           
+
+
+
+
+
+
+
+main endp
+
+end main

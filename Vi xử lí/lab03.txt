@@ -1,0 +1,145 @@
+ORG 0000H
+LJMP MAIN
+ORG 0003H
+JMP INT0_ISR
+ORG 0013H
+JMP INT1_ISR
+ORG 000BH
+JMP TIMER0_ISR
+ORG 0030H
+MAIN:
+JNB P3.0,MAIN
+LED0:
+;setup gia tri ban dau 
+LAP0:
+MOV R0,#60
+LAP00:
+; goi ham HT
+CALL HT1
+; dem gia tri cua giay 
+DEC R0
+CJNE R0,#-1,LAP00
+MOV R0,#60
+JMP LAP00
+HT1:
+
+MOV DPTR,#MALED; gan dia chi dau tien cua mang cho thanh ghi DPTR 
+MOV R6,#150 ; so vong lap
+
+;Hàm hien thi led 
+QUET0:
+
+; chia lay nguyen va pha du de bieu dien gia tri hang chuc va hang don vi cua giay 
+MOV A,R0			
+MOV B,#10			
+DIV AB			
+MOVC A,@A+DPTR	; chep vao A 1 byte tai vi tri cach con tro DPTR 1 khoang la A 
+MOV P1,A	; hien thi hang chuc cua giay 	
+CLR P0.2
+CALL DELAY
+CALL DELAY
+CALL DELAY
+SETB P0.2
+
+
+MOV A,B		
+MOVC A,@A+DPTR ;
+MOV P1,A		; hien thi hang don vi cua giay 
+CLR P0.3
+CALL DELAY
+CALL DELAY
+CALL DELAY
+SETB P0.3
+
+DJNZ R6,QUET0
+
+RET
+
+
+LED1:
+;setup gia tri ban dau 
+LAP1:
+MOV R0,#60
+LAP:
+; goi ham HT
+CALL HT
+; dem gia tri cua giay 
+DEC R0
+CJNE R0,#-1,LAP
+MOV R0,#60
+JMP LAP
+HT:
+MOV P1,#00H
+MOV DPTR,#MALED; gan dia chi dau tien cua mang cho thanh ghi DPTR 
+MOV R7,#150 ; so vong lap
+
+;Hàm hien thi led 
+QUET:
+; chia lay nguyen va pha du de bieu dien gia tri hang chuc va hang don vi cua giay 
+MOV A,R0			
+MOV B,#10			
+DIV AB			
+MOVC A,@A+DPTR	; chep vao A 1 byte tai vi tri cach con tro DPTR 1 khoang la A 
+MOV P2,A	; hien thi hang chuc cua giay 	
+CLR P0.0	
+CALL DELAY
+CALL DELAY
+CALL DELAY
+SETB P0.0
+
+
+MOV A,B		
+MOVC A,@A+DPTR ;
+MOV P2,A		; hien thi hang don vi cua giay 
+CLR P0.1
+CALL DELAY
+CALL DELAY
+CALL DELAY
+SETB P0.1
+
+DJNZ R7,QUET
+
+RET
+
+;ham delay 1000us 
+DELAY:		
+; su dung timer0 mod 1
+MOV TMOD,#01H
+MOV TH0,#HIGH(-1000) ; dem gia tri timer 1000us 
+MOV TL0,#LOW(-1000)
+SETB TR0
+JNB TF0,$
+CLR TR0
+CLR TF0
+
+RET
+;Mang dung de ma hoa chu so hien thi 
+ORG 500		
+MALED: DB 03FH,030H,05BH,4FH ,066H,06DH,7DH,07H,0FFH,06FH
+
+
+INT0_ISR:
+
+RETI
+
+
+
+
+ INT1_ISR:
+
+RETI
+ 
+ 
+ TIMER0_ISR:
+ RETI
+ 
+ 
+
+
+
+
+
+
+
+
+END

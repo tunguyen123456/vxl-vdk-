@@ -1,0 +1,275 @@
+C51 COMPILER V9.52.0.0   CONTROL                                                           11/24/2015 13:41:30 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE CONTROL
+OBJECT MODULE PLACED IN .\HEX\Control.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ProjectLib\Source\Control.c BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Inc
+                    -lude;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\Control.lst) TABS(2) OBJECT(.\HEX\Control.obj)
+
+line level    source
+
+   1          /* -------------------------------------------------
+   2            PROJECT GPIO: Dieu khien LED don bang NUT BAM
+   3            COMPANY:      MINHHAGROUP
+   4            WEB:          BANLINHKIEN.VN
+   5            FILE:       Control.c
+   6            -------------------------------------------------- */
+   7          //#include <main.h>
+   8          #include <control.h>
+   9          static unsigned char chu_so[10]= {0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90}; 
+  10          /*Hieu ung led chau duoi*/
+  11           void Test_Led_Don(void)
+  12           {
+  13   1         int i,j=2;
+  14   1         P1=0x00;
+  15   1         delay_us(10);
+  16   1         lcd1602_init();
+  17   1        lcd1602_clear();
+  18   1        lcd1602_gotoxy(0,0);
+  19   1        lcd1602_puts("Test Led Don");
+  20   1        lcd1602_gotoxy(0,1);
+  21   1        lcd1602_puts("KEY HN: 1");
+  22   1         delay_us(10);
+  23   1        P0 = 0x00;
+  24   1        P1 = 0x00;
+  25   1        P2 = 0x00;
+  26   1        P3 = 0x00;
+  27   1         while(j--)
+  28   1         {
+  29   2         for (i=0;i<8;i++)
+  30   2         {
+  31   3           P1=~(0x01<<i);
+  32   3           delay_ms(300);
+  33   3         }
+  34   2         for(i=0;i<8;i++)
+  35   2         {
+  36   3           P1=~(0x80>>i);
+  37   3           delay_ms(200);
+  38   3         }
+  39   2         for(i=0;i<4;i++)
+  40   2         {
+  41   3           P1=~(0x08<<i);
+  42   3           delay_ms(200);
+  43   3         }
+  44   2          for(i=0;i<4;i++)
+  45   2         {
+  46   3           P1=~(0x08>>i);
+  47   3           delay_ms(200);
+  48   3         }
+  49   2       }
+  50   1       }
+  51           
+  52          void Test_Key_2x2(void)
+  53          { 
+  54   1        delay_us(500);
+C51 COMPILER V9.52.0.0   CONTROL                                                           11/24/2015 13:41:30 PAGE 2   
+
+  55   1        if(KEY1==0)
+  56   1        {
+  57   2          delay_ms(10);
+  58   2        Test_UART();
+  59   2        }
+  60   1        if(KEY2==0)
+  61   1        {
+  62   2          delay_ms(10);
+  63   2          Test_Led7();
+  64   2        }
+  65   1        if(KEY3==0)
+  66   1        {
+  67   2          delay_ms(10);
+  68   2          Test_Ds18b20();
+  69   2        }
+  70   1        if(KEY4==0)
+  71   1        {
+  72   2          delay_ms(10);
+  73   2          Test_HN_IR1838T();
+  74   2          
+  75   2        }
+  76   1      }
+  77          
+  78          void Test_Led7(void)
+  79          {
+  80   1      
+  81   1        unsigned int i=0;
+  82   1        unsigned char j;
+  83   1        lcd1602_init();
+  84   1        lcd1602_clear();
+  85   1        lcd1602_gotoxy(0,0);
+  86   1        lcd1602_puts("Test Led 7 Thanh");
+  87   1        P2=0x00;
+  88   1        P1=0x00;
+  89   1        delay_ms(300);
+  90   1        for(i=0;i<8;i++)
+  91   1        {
+  92   2          P1=~(0x01<<i);
+  93   2          delay_ms(300);
+  94   2        }
+  95   1        for(j=0;j<4;j++)
+  96   1        {
+  97   2          P1=0x00;
+  98   2          P2=~(0x01<<j);
+  99   2          delay_ms(300);
+ 100   2        }
+ 101   1        for(i=0;i<500;i++)
+ 102   1          {
+ 103   2            for(j=0;j<20;j++)
+ 104   2            {
+ 105   3             LED7_Display1(i);
+ 106   3            }
+ 107   2        }
+ 108   1      }
+ 109          /*ham hien thi led 7 thanh 4 so*/
+ 110          void LED7_Display1(unsigned long int number)
+ 111          {
+ 112   1        unsigned char nghin, tram, chuc, don_vi;
+ 113   1        don_vi=((number%1000)%100)%10;
+ 114   1        chuc=((number%1000)%100)/10;
+ 115   1        tram=(number%1000)/100;
+ 116   1        nghin=number/1000;
+C51 COMPILER V9.52.0.0   CONTROL                                                           11/24/2015 13:41:30 PAGE 3   
+
+ 117   1        P2=0xFF;
+ 118   1        LED7_DATA=chu_so[don_vi];
+ 119   1        P2=~0x08;
+ 120   1        delay_ms(1);
+ 121   1        P2=0xFF;
+ 122   1        LED7_DATA=chu_so[chuc];
+ 123   1        P2=~0x04;
+ 124   1        delay_ms(1);
+ 125   1        P2=0xFF;
+ 126   1        LED7_DATA=chu_so[tram];
+ 127   1        P2=~0x02; 
+ 128   1        delay_ms(1);
+ 129   1        P2=0xFF;
+ 130   1        LED7_DATA=chu_so[nghin];
+ 131   1        P2=~0x01;
+ 132   1        delay_ms(1);
+ 133   1        P2=0xFF;
+ 134   1      }
+ 135          void Test_LCD16x2(void)
+ 136          {
+ 137   1        lcd1602_init();
+ 138   1        lcd1602_clear();
+ 139   1        lcd1602_gotoxy(0,0);
+ 140   1        lcd1602_puts("MINHHAGROUP");
+ 141   1        lcd1602_gotoxy(0,1);
+ 142   1        lcd1602_puts(" TEST KIT 89S52");  
+ 143   1      }
+ 144          /*
+ 145          Relay dung la loai NPN vay nen se de Relay dong trong 2s roi ngat
+ 146          */
+ 147          void Test_Coichip_Relay (void)
+ 148          {
+ 149   1          COI=0;
+ 150   1        RELAY=0;
+ 151   1      
+ 152   1          lcd1602_init();
+ 153   1          lcd1602_clear();  
+ 154   1        lcd1602_gotoxy(0,0);
+ 155   1          lcd1602_puts("Test Relay-coi");
+ 156   1          lcd1602_gotoxy(0,1);
+ 157   1          lcd1602_puts("KEY HN: 2");  
+ 158   1          
+ 159   1           delay_ms(1000);  
+ 160   1          RELAY=~RELAY;
+ 161   1          COI=~COI;
+ 162   1        delay_ms(800);
+ 163   1        COI=0;
+ 164   1          
+ 165   1            
+ 166   1      }
+ 167          
+ 168          void Test_UART(void)
+ 169            { 
+ 170   1          unsigned char Uart_char;
+ 171   1            
+ 172   1            UART_Init();
+ 173   1            EA=1;
+ 174   1            UART_Puts("MinhHaGroup");
+ 175   1           lcd1602_init();
+ 176   1            lcd1602_clear();       
+ 177   1            lcd1602_gotoxy(0,0);
+ 178   1            lcd1602_puts("Test UART");
+C51 COMPILER V9.52.0.0   CONTROL                                                           11/24/2015 13:41:30 PAGE 4   
+
+ 179   1            delay_ms(1000);
+ 180   1        
+ 181   1              Uart_char = UART_GetChar();
+ 182   1          while(1)
+ 183   1          {
+ 184   2              Uart_char = UART_GetChar();
+ 185   2              if(Uart_char)
+ 186   2              {
+ 187   3              lcd1602_clear();  
+ 188   3              lcd1602_gotoxy(0,0);
+ 189   3              lcd1602_putchar(Uart_char);
+ 190   3              }
+ 191   2            }
+ 192   1        }
+ 193          
+ 194          void Test_Ds18b20(void)
+ 195          {
+ 196   1        float Nhiet_Do;
+ 197   1        unsigned char Lcd_Buff[30];
+ 198   1          lcd1602_init();
+ 199   1          lcd1602_clear();
+ 200   1          while(1)
+ 201   1          {
+ 202   2            Nhiet_Do = ds18b20_readtemp();  
+ 203   2            lcd1602_gotoxy(0,0);
+ 204   2            lcd1602_puts("Test DS18B20");
+ 205   2            sprintf(Lcd_Buff," TEMP: %2.2f^C",Nhiet_Do);
+ 206   2            lcd1602_gotoxy(0,1);
+ 207   2            lcd1602_puts(Lcd_Buff);
+ 208   2            delay_ms(300);
+ 209   2          }
+ 210   1      }
+ 211          void Test_HN_IR1838T(void)
+ 212          {
+ 213   1        
+ 214   1        unsigned long int Data; 
+ 215   1      
+ 216   1        TMOD=0x01; // cau hinh timer 0 che do 1
+ 217   1        
+ 218   1        while(1)
+ 219   1        {
+ 220   2              Data = INFR_GetCode();    // Gan ma cua kenh vao bien Data  
+ 221   2             //Ham hien thi gia tri ma cua cac kenh len LCD1602
+ 222   2           if(Data==KEY3HN)
+ 223   2           {       
+ 224   3              Test_Led_Don(); 
+ 225   3              delay_ms(100);
+ 226   3           }
+ 227   2           if(Data==TESTCOI_RELAY)
+ 228   2             {
+ 229   3               Test_Coichip_Relay ();
+ 230   3            
+ 231   3             }
+ 232   2            if(Data==TESTUART) 
+ 233   2              {
+ 234   3              lcd1602_init();
+ 235   3              lcd1602_clear();
+ 236   3                 lcd1602_gotoxy(0,0);
+ 237   3                lcd1602_puts("Test hong ngoai");
+ 238   3               lcd1602_gotoxy(0,1);
+ 239   3             lcd1602_puts("KEY: 3");  
+ 240   3              }
+C51 COMPILER V9.52.0.0   CONTROL                                                           11/24/2015 13:41:30 PAGE 5   
+
+ 241   2         }
+ 242   1      }
+ 243          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1149    ----
+   CONSTANT SIZE    =    166    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10      54
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

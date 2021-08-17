@@ -1,0 +1,42 @@
+void khoitao()
+{
+
+    TMOD = 0x20;    //Timer 1, 8bit tu nap lai
+    TH1 = 253;     //Buadrate: 9600
+    SCON = 0x50;   //SM0 = 0, SM1 = 1; REN = 1;
+    TR1 = 1;   // khoi dong timer 1
+
+}  
+
+/*Ham truyen 1 ky tu*/
+void UART_PutChar(unsigned char chr)
+{
+ SBUF = chr;           //ghi ky tu vao SBUF de truyen
+ while(TI == 0);       //Cho cho co TI bat len 1
+ TI = 0;
+}    
+
+/*Ham nhan 1 ky tu*/
+unsigned char UART_GetChar(void)
+{
+ unsigned char temp;
+ while(RI == 0);    //Cho co RI duoc bat len 1 bao co du lieu den
+ temp = SBUF;          // doc du lieu 
+ RI = 0;               // xoa co RI de lan nhan tiep theo
+ return temp;
+}
+
+
+
+/nhan du lieu su dung ngat/
+/*ISR UART*/
+void ISR_UART(void) interrupt 4
+{
+ if(RI == 1)           //Kiem tra xem la ngat nhan hay truyen
+ {
+    chr_isr = SBUF;   //nhan du lieu
+    RI = 0;
+ }
+}
+   
+ 

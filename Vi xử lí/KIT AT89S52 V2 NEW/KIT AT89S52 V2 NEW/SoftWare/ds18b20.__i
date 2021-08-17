@@ -1,0 +1,1 @@
+"Device\Source\ds18b20.c" BROWSE INCDIR(..\TESTKIT89S52V2;.\Device\Include;.\Main\Include;.\ProjectLib\Include) DEBUG OBJECTEXTEND PRINT(.\ds18b20.lst) TABS (2) OBJECT(ds18b20.obj)
